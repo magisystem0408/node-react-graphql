@@ -74,7 +74,7 @@ const RootQuery = new GraphQLObjectType({
         directors: {
             type: new GraphQLList(DirectorType),
             resolve(parent, args) {
-                return Movie.find({})
+                return Director.find({})
             }
         }
     }
