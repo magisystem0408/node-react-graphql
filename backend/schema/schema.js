@@ -1,8 +1,9 @@
 const graphql = require('graphql')
-const Movie = require('../models/movie')
 const {GraphQLSchema} = require("graphql");
-const {GraphQLObjectType, GraphQLID, GraphQLString} = graphql
+const {GraphQLObjectType, GraphQLID, GraphQLString, GraphQLInt} = graphql
 
+const Movie = require('../models/movie')
+const Director = require('../models/director')
 
 const MovieType = new GraphQLObjectType({
     name: 'Movie',
@@ -14,8 +15,18 @@ const MovieType = new GraphQLObjectType({
     })
 })
 
-// 外部から呼び出せるようにする
+const DirectorType = new GraphQLObjectType({
+    name: 'Director',
+//    取得したいデータ、その型を入力する
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        age: {type: GraphQLInt},
+    })
+})
 
+
+// 外部から呼び出せるようにする
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
@@ -29,6 +40,13 @@ const RootQuery = new GraphQLObjectType({
             //parent：受け取ったオブジェクト
             resolve(parents, args) {
                 return Movie.findById(args.id)
+            }
+        },
+        director: {
+            type: DirectorType,
+            args: {id: {type: GraphQLID}},
+            resolve(parents, args) {
+                return Director.findById(args.id)
             }
         }
     }
@@ -54,6 +72,21 @@ const Mutation = new GraphQLObjectType({
                 return movie.save()
             }
         },
+        addDirector: {
+            type: DirectorType,
+            //argsの型定義
+            args: {
+                name: {type: GraphQLString},
+                age: {type: GraphQLInt}
+            },
+            resolve(parent, args) {
+                let director = new Director({
+                    name: args.name,
+                    age: args.age,
+                })
+                return director.save()
+            }
+        }
     }
 })
 

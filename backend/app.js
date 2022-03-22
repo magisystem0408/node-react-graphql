@@ -14,7 +14,7 @@ mongoose.connect(process.env.MONGO_URL, {
 })
 
 mongoose.connection.once('open', () => {
-    console.log("db connected")
+    console.log("データベースの接続が完了しました。")
 })
 
 app.use('/graphql', graphqlHTTP({
