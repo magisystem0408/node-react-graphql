@@ -40,6 +40,7 @@ const DirectorType = new GraphQLObjectType({
 })
 
 
+//データ取得
 // 外部から呼び出せるようにする
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
@@ -61,6 +62,19 @@ const RootQuery = new GraphQLObjectType({
             args: {id: {type: GraphQLString}},
             resolve(parent, args) {
                 return Director.findById(args.id);
+            }
+        },
+        //一覧取得
+        movies:{
+            type: new GraphQLList(MovieType),
+            resolve(parent, args){
+                return Movie.find({})
+            }
+        },
+        directors:{
+            type: new GraphQLList(DirectorType),
+            resolve(parent,args){
+                return Movie.find({})
             }
         }
     }
