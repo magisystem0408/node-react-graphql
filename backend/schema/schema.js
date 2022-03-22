@@ -1,6 +1,6 @@
 const graphql = require('graphql')
 const {GraphQLSchema} = require("graphql");
-const {GraphQLObjectType, GraphQLID, GraphQLString, GraphQLInt, GraphQLList} = graphql
+const {GraphQLObjectType, GraphQLID, GraphQLString, GraphQLInt, GraphQLList,GraphQLNonNull} = graphql
 
 const Movie = require('../models/movie')
 const Director = require('../models/director')
@@ -65,15 +65,15 @@ const RootQuery = new GraphQLObjectType({
             }
         },
         //一覧取得
-        movies:{
+        movies: {
             type: new GraphQLList(MovieType),
-            resolve(parent, args){
+            resolve(parent, args) {
                 return Movie.find({})
             }
         },
-        directors:{
+        directors: {
             type: new GraphQLList(DirectorType),
-            resolve(parent,args){
+            resolve(parent, args) {
                 return Movie.find({})
             }
         }
@@ -116,6 +116,38 @@ const Mutation = new GraphQLObjectType({
                 })
                 return director.save()
             }
+        },
+        //    更新処理
+        updateMovie: {
+            type: MovieType,
+            args: {
+                id: {type: new GraphQLNonNull(GraphQLID)},
+                name: {type: GraphQLString},
+                genre: {type: GraphQLString},
+                directorId: {type: GraphQLInt}
+            },
+            resolve(parent, args) {
+                let updateMovie = {}
+                args.name && (updateMovie.name = args.name)
+                args.genre && (updateMovie.genre = args.genre)
+                args.directorId && (updateMovie.directorId = args.directorId)
+                return Movie.findByIdAndUpdate(args.id, updateMovie, {new: true})
+            }
+        },
+        updateDirector: {
+            type: DirectorType,
+            args: {
+                id: {type: new GraphQLNonNull(GraphQLID)},
+                name: {type: GraphQLString},
+                age: {type: GraphQLInt},
+            },
+            resolve(parent, args) {
+                let updateDirector = {}
+                args.name && (updateDirector.name = args.name)
+                args.arg && (updateDirector.arg = args.arg)
+                return Director.findByIdAndUpdate(args.id, updateDirector, {new: true})
+            }
+
         }
     }
 })
