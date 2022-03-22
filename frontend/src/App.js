@@ -3,17 +3,14 @@ import {Header} from "./components/Header";
 import {Col, Container, Row} from "reactstrap";
 import {SideNav} from "./components/SideNav";
 import {MovieList} from "./components/MovieList";
-import {ApolloClient} from "apollo-boost";
-import {ApolloProvider, useQuery} from "@apollo/react-hooks";
-import {MOVIE_LIST} from "./querires/querires";
-
+import {ApolloClient, ApolloProvider, InMemoryCache} from "@apollo/client";
 
 const client = new ApolloClient({
-    uri: 'http://localhost:4000/graphql'
+    uri: 'http://localhost:4000/graphql?',
+    cache: new InMemoryCache()
 })
 
 const App = () => {
-    const {loading ,error,data} =useQuery(MOVIE_LIST)
     return (
         <div className="App">
             <Header/>

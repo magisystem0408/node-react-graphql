@@ -1,26 +1,51 @@
 import React from 'react'
-import {Card, CardBody, Table} from "reactstrap";
+import { Button, Card, CardBody, Table } from 'reactstrap'
+import { DELETE_MOVIE, MOVIE_LIST } from '../querires/querires'
+import { useMutation, useQuery } from '@apollo/client'
 
+export const MovieList = () => {
+  const { loading, error, data } = useQuery(MOVIE_LIST)
+  const [deleteMutation] = useMutation(DELETE_MOVIE, {
+    refetchQueries: [{ query: MOVIE_LIST }],
+    awaitRefetchQueries: true,
+  })
+  const handleDelete = (id) => {
+    deleteMutation({ variables: { id } })
+  }
 
-export const MovieList=()=>{
-    return <Card>
+  if (loading) {
+    return <p>Loading...</p>
+  } else if (error) {
+    return <p>Error</p>
+  } else {
+    return (
+      <Card>
         <CardBody>
-            <Table>
-                <thead>
-                <tr>
-                    <th>タイトル</th>
-                    <th>ジャンル</th>
-                    <th>監督</th>
+          <Table hover>
+            <thead>
+              <tr>
+                <th>タイトル</th>
+                <th>ジャンル</th>
+                <th colSpan='2'>監督</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.movies.map(({ id, name, genre, director }) => (
+                <tr key={id}>
+                  <td>{name}</td>
+                  <td>{genre}</td>
+                  <td>{director.name}</td>
+                  <td>
+                    <Button color='primary' onClick={() => handleDelete(id)}>
+                      削除
+                    </Button>
+                  </td>
                 </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <th>タイトル</th>
-                    <th>ジャンル</th>
-                    <th>監督</th>
-                </tr>
-                </tbody>
-            </Table>
+              ))}
+            </tbody>
+          </Table>
         </CardBody>
-    </Card>
+      </Card>
+    )
+  }
 }
