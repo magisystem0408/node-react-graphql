@@ -1,6 +1,6 @@
 const graphql = require('graphql')
 const {GraphQLSchema} = require("graphql");
-const {GraphQLObjectType, GraphQLID, GraphQLString, GraphQLInt} = graphql
+const {GraphQLObjectType, GraphQLID, GraphQLString, GraphQLInt, GraphQLList} = graphql
 
 const Movie = require('../models/movie')
 const Director = require('../models/director')
@@ -12,6 +12,12 @@ const MovieType = new GraphQLObjectType({
         id: {type: GraphQLID},
         name: {type: GraphQLString},
         genre: {type: GraphQLString},
+        director: {
+            type: DirectorType,
+            resolve(parent, args) {
+                return Director.findById(parent.directorId)
+            }
+        }
     })
 })
 
@@ -22,10 +28,19 @@ const DirectorType = new GraphQLObjectType({
         id: {type: GraphQLID},
         name: {type: GraphQLString},
         age: {type: GraphQLInt},
+        //one-to-many
+        movies: {
+            type: new GraphQLList(MovieType),
+            //parentsにはDirecotrorの情報が入ってきてる
+            resolve(parents, args) {
+                return Movie.find({directorId: parents.id})
+            }
+        }
     })
 })
 
 
+//データ取得
 // 外部から呼び出せるようにする
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
@@ -44,9 +59,22 @@ const RootQuery = new GraphQLObjectType({
         },
         director: {
             type: DirectorType,
-            args: {id: {type: GraphQLID}},
-            resolve(parents, args) {
-                return Director.findById(args.id)
+            args: {id: {type: GraphQLString}},
+            resolve(parent, args) {
+                return Director.findById(args.id);
+            }
+        },
+        //一覧取得
+        movies:{
+            type: new GraphQLList(MovieType),
+            resolve(parent, args){
+                return Movie.find({})
+            }
+        },
+        directors:{
+            type: new GraphQLList(DirectorType),
+            resolve(parent,args){
+                return Movie.find({})
             }
         }
     }
@@ -61,12 +89,14 @@ const Mutation = new GraphQLObjectType({
             args: {
                 name: {type: GraphQLString},
                 genre: {type: GraphQLString},
+                directorId: {type: GraphQLID},
             },
             resolve(parent, args) {
                 // インスタンスを生成
                 let movie = new Movie({
                     name: args.name,
                     genre: args.genre,
+                    directorId: args.directorId
                 })
                 // 受け取った値を代入
                 return movie.save()
